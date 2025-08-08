@@ -1,0 +1,19 @@
+CREATE DATABASE IF NOT EXISTS $MYSQL_DB;
+USE ${MYSQL_DB};
+
+CREATE TABLE calculations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    operand1 DOUBLE NOT NULL,
+    operand2 DOUBLE NOT NULL,
+    operation ENUM('add', 'subtract', 'multiply', 'divide') NOT NULL,
+    result DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_created_at ON calculations(created_at);
+
+CREATE USER '${MYSQL_USER}'@'${MYSQL_HOST}' IDENTIFIED BY '${MYSQL_PASSWORD}';
+
+GRANT ALL PRIVILEGES ON ${MYSQL_DB}.* TO '${MYSQL_USER}'@'${MYSQL_HOST}';
+
+FLUSH PRIVILEGES;
