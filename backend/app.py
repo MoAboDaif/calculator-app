@@ -16,18 +16,18 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 mysql = init_db(app)
 
 # Configure CORS from environment
-# Update CORS configuration
-# allowed_origins = os.getenv('ALLOWED_ORIGINS', '').split(',')
-# CORS(
-#     app,
-#     origins=allowed_origins,
-#     methods=["GET", "POST", "OPTIONS"],
-#     allow_headers=["Content-Type"],
-#     supports_credentials=True
-# )
 
+allowed_origins = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
-CORS(app, resources={r"/*": {"origins": "*"}}) # - Uncomment to allow all origins
+CORS(
+    app,
+    origins=allowed_origins,
+    methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+    supports_credentials=True
+)
+
+# CORS(app, resources={r"/*": {"origins": "*"}}) # - Uncomment to allow all origins
 
 
 @app.route('/')

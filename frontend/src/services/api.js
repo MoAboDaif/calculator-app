@@ -1,4 +1,30 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
+
+const handleResponse = async (response) => {
+  const contentType = response.headers.get('content-type');
+  
+  // Handle HTML responses (errors)
+  if (contentType && contentType.includes('text/html')) {
+    const text = await response.text();
+    throw new Error(`Server returned HTML: ${text.slice(0, 100)}...`);
+  }
+  
+  // Handle JSON responses
+  if (contentType && contentType.includes('application/json')) {
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Request failed');
+    }
+    return data;
+  }
+
+  // Handle other response types
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(text || `Request failed with status ${response.status}`);
+  }
+  return text;
+};
 
 export const calculate = async (a, b, operation) => {
   try {
@@ -11,14 +37,9 @@ export const calculate = async (a, b, operation) => {
       body: JSON.stringify({ a, b, operation })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Calculation error');
-    }
-
-    return await response.json();
+    return await handleResponse(response);
   } catch (error) {
-    throw error;
+    throw new Error(error.message || 'Network error');
   }
 };
 
@@ -31,13 +52,8 @@ export const getHistory = async () => {
       }
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to fetch history');
-    }
-
-    return await response.json();
+    return await handleResponse(response);
   } catch (error) {
-    throw error;
+    throw new Error(error.message || 'Failed to fetch history');
   }
 };
