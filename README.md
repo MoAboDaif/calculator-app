@@ -314,45 +314,35 @@ If you open `init.sql.template`, you should see `CREATE DATABASE IF NOT EXISTS $
 Use a config that provides SPA fallback and sets common proxy headers.
 
 ```nginx
+
 server {
-    listen 80;
-    server_name localhost;
+    server_name _;
+    listen 80 default_server;
 
-    # Serve frontend static files (if you have a build directory)
-    # root /var/www/calculator/build;
-    # index index.html;
+#    root /var/www/html;   # uncomment if using static build files
+#    index index.html;     # uncomment if using static build files
 
-    location / {
-        # If using the React dev server, you are probably proxying to it instead:
-        # proxy_pass http://127.0.0.1:3000;
-        # If serving built files, use try_files to fallback on index.html
-        try_files $uri /index.html;
-
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
+    location / {                                              # comment if using static build files
+        proxy_pass http://localhost:3000;  # comment if using static build files
+    }                                                         # comment if using static build files
+    
     location /api/ {
-        proxy_pass http://127.0.0.1:5000/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_pass http://localhost:5000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Host $host;
-    }
 
-    # optional: static assets caching directives
-    location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico)$ {
-        try_files $uri =404;
-        expires 1d;
-        add_header Cache-Control "public";
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'Content-Type';
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
     }
 }
+
 ```
 
 **Notes**

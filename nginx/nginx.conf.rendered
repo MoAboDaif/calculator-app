@@ -1,21 +1,18 @@
 server {
     listen 80;
-    server_name ${SERVER_NAME};
+    server_name localhost;
 
-#    root /var/www/html;   # uncomment if using static build files
-#    index index.html;     # uncomment if using static build files
-
-    location / {                                              # comment if using static build files
-        proxy_pass http://${FRONTEND_HOST}:${FRONTEND_PORT};  # comment if using static build files
-    }                                                         # comment if using static build files
+    location / {
+        proxy_pass http://localhost:3000;
+    }
     
     location /api/ {
-        proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT}/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass http://localhost:5000/;
+        proxy_set_header Host ;
+        proxy_set_header X-Real-IP ;
 
         # Handle preflight requests
-        if ($request_method = 'OPTIONS') {
+        if ( = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' '*';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
             add_header 'Access-Control-Allow-Headers' 'Content-Type';
@@ -29,17 +26,17 @@ server {
 
 # server {
 #     listen 443 ssl;
-#     server_name ${SERVER_NAME};
+#     server_name localhost;
     
-#     ssl_certificate /etc/letsencrypt/live/${SERVER_NAME}/fullchain.pem;
-#     ssl_certificate_key /etc/letsencrypt/live/${SERVER_NAME}/privkey.pem;
+#     ssl_certificate /etc/letsencrypt/live/localhost/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/localhost/privkey.pem;
     
 #     location / {
-#         proxy_pass http://${FRONTEND_HOST}:${FRONTEND_PORT};
+#         proxy_pass http://localhost:3000;
 #     }
     
 #     location /api/ {
-#         proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT}/;
+#         proxy_pass http://localhost:5000/;
 #         proxy_set_header Host ;
 #         proxy_set_header X-Real-IP ;
         
