@@ -365,7 +365,7 @@ python -m unittest discover tests
 
 ```bash
 cd frontend
-npm test
+npm run test # or npm run test:ci
 ```
 
 **API check:**
