@@ -2,7 +2,7 @@
 
 ![Calculator Application UI](app-ui.png)
 
-A full-stack calculator application with a **React** frontend, **Flask** backend, **MySQL** database, and **Nginx** reverse proxy. Designed for easy local development (no Docker/Kubernetes required in this README). It supports basic arithmetic operations, persistent history, dark/light theme, and is easy to run locally behind an Nginx proxy.
+A robust full-stack calculator app featuring a **React** frontend, **Flask** backend, **MySQL** database, and **Nginx** reverse proxy. Designed for seamless local development—no Docker or Kubernetes required. Supports basic arithmetic, persistent history, dark/light theme, and easy Nginx proxy setup.
 
 ---
 
@@ -10,30 +10,28 @@ A full-stack calculator application with a **React** frontend, **Flask** backend
 
 1. [Features](#features)
 2. [Architecture](#architecture)
-3. [Project structure](#project-structure)
+3. [Project Structure](#project-structure)
 4. [Prerequisites](#prerequisites)
-5. [Environment (`.env`) and templates](#environment-env-and-templates)
-6. [Canonical local setup (step-by-step)](#canonical-local-setup-step-by-step)
-
-   * [1. Clone repo](#1-clone-repo)
-   * [2. Prepare `.env`](#2-prepare-env)
-   * [3. Prepare database SQL files (template processing)](#3-prepare-database-sql-files-template-processing)
-   * [4. Initialize the database](#4-initialize-the-database)
-   * [5. Start the backend (Flask)](#5-start-the-backend-flask)
-   * [6. Start the frontend (React)](#6-start-the-frontend-react)
-   * [7. Configure / start Nginx](#7-configure--start-nginx)
-   * [8. Visit the app](#8-visit-the-app)
-7. [Configuration details](#configuration-details)
-
-   * [Which components read which variables](#which-components-read-which-variables)
-   * [React dev server vs built frontend behavior](#react-dev-server-vs-built-frontend-behavior)
-8. [Database initialization scripts explained](#database-initialization-scripts-explained)
-9. [Nginx configuration recommended snippet](#nginx-configuration-recommended-snippet)
-10. [CORS notes](#cors-notes)
-11. [Platform notes (Windows / macOS / Linux)](#platform-notes-windows--macos--linux)
+5. [Environment Setup (`.env`) & Templates](#environment-setup-env--templates)
+6. [Local Setup Guide](#local-setup-guide)
+  * [1. Clone Repository](#1-clone-repository)
+  * [2. Prepare `.env`](#2-prepare-env)
+  * [3. Process Database Templates](#3-process-database-templates)
+  * [4. Initialize Database](#4-initialize-database)
+  * [5. Start Backend (Flask)](#5-start-backend-flask)
+  * [6. Start Frontend (React)](#6-start-frontend-react)
+  * [7. Configure & Start Nginx](#7-configure--start-nginx)
+  * [8. Access the App](#8-access-the-app)
+7. [Configuration Reference](#configuration-reference)
+  * [Environment Variables by Component](#environment-variables-by-component)
+  * [Frontend Dev vs Production](#frontend-dev-vs-production)
+8. [Database Initialization Scripts](#database-initialization-scripts)
+9. [Recommended Nginx Configuration](#recommended-nginx-configuration)
+10. [CORS Guidance](#cors-guidance)
+11. [Platform Notes](#platform-notes)
 12. [Testing](#testing)
-13. [Troubleshooting & common issues](#troubleshooting--common-issues)
-14. [Security & production notes](#security--production-notes)
+13. [Troubleshooting](#troubleshooting)
+14. [Security & Production](#security--production)
 15. [Contributing](#contributing)
 16. [License](#license)
 
@@ -43,87 +41,82 @@ A full-stack calculator application with a **React** frontend, **Flask** backend
 
 * Responsive React UI with dark/light theme toggle
 * Arithmetic operations: add, subtract, multiply, divide
-* Calculation history persisted to MySQL with timestamps
-* Nginx acts as a single entry reverse proxy (`/` → frontend, `/api` → backend)
-* Designed for easy local development and CI integration
+* Calculation history stored in MySQL with timestamps
+* Nginx reverse proxy: `/` → frontend, `/api` → backend
+* Optimized for local development and CI
 
 ---
 
 ## Architecture
 
 ```
-User -> Nginx (Proxy)
-        ├── /       → Frontend (React)
-        └── /api/   → Backend (Flask) -> MySQL
+User → Nginx (Proxy)
+      ├── /       → Frontend (React)
+      └── /api/   → Backend (Flask) → MySQL
 ```
 
-Nginx unifies endpoints so the frontend can call `/api/...` (no cross-origin concerns when proxying).
+Nginx unifies endpoints, allowing the frontend to call `/api/...` without cross-origin issues.
 
 ---
 
-## Project structure
+## Project Structure
 
 ```
 calculator-app/
-├── backend/                   # Flask API server
-│   ├── app.py                 # Main Flask application
-│   ├── calculator.py          # Core calculator functions
-│   ├── db.py                  # Database connection / init helpers
-│   ├── models.py              # Database models
-│   ├── requirements.txt       # Python dependencies
-│   └── tests/                 # Backend tests
-│
-├── database/                  # DB templates & init helper
-│   ├── init-db.sh             # Script to render templates into SQL
-│   ├── init.sql.template      # DB schema template
-│   └── seed.sql.template      # Optional seed data
-│
-├── frontend/                  # React application
+├── backend/         # Flask API server
+│   ├── app.py
+│   ├── calculator.py
+│   ├── db.py
+│   ├── models.py
+│   ├── requirements.txt
+│   └── tests/
+├── database/        # DB templates & init scripts
+│   ├── init-db.sh
+│   ├── init.sql.template
+│   └── seed.sql.template
+├── frontend/        # React app
 │   ├── public/
 │   ├── src/
 │   └── package.json
-│
-├── nginx/                     # Nginx templates and helper
+├── nginx/           # Nginx templates & helpers
 │   ├── nginx.conf.template
-│   └── entrypoint.sh          # optional template renderer for nginx config
-│
+│   └── entrypoint.sh
 └── README.md
 ```
 
-> Note: `nginx/entrypoint.sh` and `database/init-db.sh` are small helper scripts that typically call `envsubst` to replace environment variables in `*.template` files. See the Database & Nginx sections below.
+> `nginx/entrypoint.sh` and `database/init-db.sh` are helper scripts for local setup, using `envsubst` to process templates.
 
 ---
 
 ## Prerequisites
 
-Install these before following the setup steps:
+Install before setup:
 
-* **Python 3.9+** (and `venv`)
-* **Node.js 16+** and **npm**
-* **MySQL 8.0+** (server running locally or accessible)
-* **Nginx** (for reverse proxy)
-* **gettext** (for `envsubst`, used to process template files) — package name typically `gettext`
+* **Python 3.9+** (with `venv`)
+* **Node.js 16+** & **npm**
+* **MySQL 8.0+** (local or accessible server)
+* **Nginx** (reverse proxy)
+* **gettext** (`envsubst` for templates)
+  * Debian/Ubuntu: `sudo apt-get install gettext`
+  * macOS: `brew install gettext && brew link --force gettext`
+  * Windows: use WSL/Git Bash or edit templates manually
 
-  * Debian / Ubuntu: `sudo apt-get install gettext`
-  * macOS (Homebrew): `brew install gettext` and `brew link --force gettext` (or use `env` path)
-  * Windows: use WSL / Git Bash, or process templates manually
+Optional for development:
 
-Optional tools (helpful during dev):
-
-* `curl`, `jq` for quick testing
-* `make` (if repository has a Makefile)
+* `curl`, `jq` for API testing
+* `make` (if Makefile present)
 
 ---
 
-## Environment (`.env`) and templates
+## Environment Setup (`.env`) & Templates
 
-Copy the example and edit it:
+Copy and edit the example:
 
 ```bash
 cp .env.example .env
 ```
 
-**Sample `.env.example` (root)**
+**Sample `.env.example`**
 
 ```env
 # Backend
@@ -136,7 +129,7 @@ SECRET_KEY=secretkey
 # Frontend (dev)
 REACT_APP_API_BASE_URL=/api
 
-# Nginx (for template)
+# Nginx
 SERVER_NAME=localhost
 FRONTEND_HOST=localhost
 FRONTEND_PORT=3000
@@ -144,269 +137,238 @@ BACKEND_HOST=localhost
 BACKEND_PORT=5000
 ```
 
-**Important**
+**Notes:**
 
-* `REACT_APP_...` variables are read at build time by Create React App / Vite. If you change them you usually need to restart/rebuild the frontend.
-* Keep secrets out of source control — add `.env` to `.gitignore`.
+* `REACT_APP_...` variables are read at build time; restart/rebuild frontend after changes.
+* Keep secrets out of source control—add `.env` to `.gitignore`.
 
 ---
 
-## Canonical local setup (step-by-step)
+## Local Setup Guide
 
-This is the single canonical flow you should follow for local development.
+Follow these steps for local development.
 
-### 1. Clone repo
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/MoAboDaif/calculator-app.git
 cd calculator-app
 ```
 
-### 2. Prepare `.env`
+### 2. Prepare Environment
+
+Install required tools:
+
+```bash
+./requirements.sh
+```
+
+Copy and edit `.env`:
 
 ```bash
 cp .env.example .env
-# edit .env with your editor to match your local environment
+# Edit .env to match your environment
 ```
 
-### 3. Prepare database SQL files (template processing)
+### 3. Process Database Templates
 
-Generate final SQL from templates. Move into `database/` and run the helper:
+Generate SQL from templates:
 
 ```bash
 cd database
-# Linux / macOS / WSL
 ./init-db.sh
-
-# init-db.sh typically does:
-# envsubst < init.sql.template > init.sql
-# envsubst < seed.sql.template > seed.sql
+# Uses envsubst to create init.sql and seed.sql
 ```
 
-If you don't have `envsubst`, either install `gettext` or manually create `init.sql` and `seed.sql` using a text editor.
+If `envsubst` is missing, install `gettext` or edit templates manually.
 
-### 4. Initialize the database
+### 4. Initialize Database
 
-With MySQL running and accessible as an admin user (root or equivalent):
+With MySQL running:
 
 ```bash
-# from repository root (or cd ../database)
 mysql -u root -p < database/init.sql
 mysql -u root -p < database/seed.sql  # optional
 ```
 
-If you can't run as root, ask your DBA or run the SQL that creates the DB/user (the templates include CREATE DATABASE/USER/GRANT).
+If not root, use an admin account or request DBA help.
 
-### 5. Start the backend (Flask)
-
-Open a terminal and:
+### 5. Start Backend (Flask)
 
 ```bash
 cd backend
 python -m venv venv
-# Linux/macOS:
-source venv/bin/activate
-# Windows (PowerShell):
-# .\venv\Scripts\Activate.ps1
+source venv/bin/activate  # Windows: .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-# Export environment variables (or load from .env)
+# Export environment variables or use a loader
 export MYSQL_HOST=localhost
 export MYSQL_USER=calculator_user
 export MYSQL_PASSWORD=securepassword
 export MYSQL_DB=calculator_db
 export SECRET_KEY=secretkey
 export FLASK_APP=app.py
-export FLASK_ENV=development   # optional, enables debug mode
+export FLASK_ENV=development
 
-# Recommended host/port for local Nginx proxy on same machine:
 flask run --host=127.0.0.1 --port=5000
-# If Nginx is running elsewhere or containerized: use --host=0.0.0.0
 ```
 
-### 6. Start the frontend (React)
-
-Open a second terminal:
+### 6. Start Frontend (React)
 
 ```bash
 cd frontend
 npm install
-
-# For dev with proxying via Nginx:
 export REACT_APP_API_BASE_URL=/api
 npm start
 ```
 
-Notes:
-
-* Running the React dev server will serve at `http://localhost:3000` by default.
-* If you plan to serve the built frontend files via Nginx, build and place the `build/` folder where Nginx will serve it:
+* Dev server: `http://localhost:3000`
+* For production, build and copy to Nginx root:
 
   ```bash
   npm run build
-  # copy build/ to directory served by Nginx, or configure Nginx root accordingly
+  sudo cp -r build/* /var/www/html
+  sudo chown www-data:www-data /var/www/html
   ```
 
-### 7. Configure / start Nginx
+  Update Nginx config as needed and reload:
 
-**Option A — Use the template helper (if provided)**
+  ```bash
+  sudo systemctl reload nginx
+  ```
 
-If `nginx/entrypoint.sh` exists and uses `envsubst`, run it to produce a concrete `nginx.conf`:
+### 7. Configure & Start Nginx
+
+Generate config from template:
 
 ```bash
 cd nginx
-./entrypoint.sh /etc/nginx/nginx.conf   # or ./entrypoint.sh ./nginx.conf.rendered
+./entrypoint.sh
 ```
 
-**Option B — Manual setup**
-
-Create or edit an Nginx site config (example below at [Nginx configuration recommended snippet](#nginx-configuration-recommended-snippet)). Place it in your system Nginx config (e.g., `/etc/nginx/sites-available/calculator` on Debian/Ubuntu) and symlink to `sites-enabled/`.
-
-Validate config and reload:
+Validate and reload:
 
 ```bash
 sudo nginx -t
-# reload gracefully
 sudo systemctl reload nginx
-# or, if not using systemctl:
-sudo nginx -s reload
 ```
 
-### 8. Visit the app
+### 8. Access the App
 
-Open your browser at:
+Visit:
 
 ```
 http://localhost
 ```
 
-If everything is configured, Nginx will serve the frontend and proxy `/api` requests to the Flask backend.
+Nginx serves the frontend and proxies `/api` requests to Flask.
 
 ---
 
-## Configuration details
+## Configuration Reference
 
-### Which components read which variables
+### Environment Variables by Component
 
-* **Backend (Flask)**: `MYSQL_*`, `SECRET_KEY`, any backend-specific env vars. These can be exported in the shell, read from a `.env` using a loader, or set in your system service.
-* **Frontend (React dev)**: `REACT_APP_API_BASE_URL` — used by the client to call the API. When using Nginx as reverse proxy, use `/api`. When calling backend directly from dev server, use `http://localhost:5000`.
-* **Nginx templates**: `SERVER_NAME`, `FRONTEND_HOST`, `FRONTEND_PORT`, `BACKEND_HOST`, `BACKEND_PORT` — only if you use the provided `nginx/nginx.conf.template` with `envsubst`.
+* **Backend (Flask):** `MYSQL_*`, `SECRET_KEY`
+* **Frontend (React):** `REACT_APP_API_BASE_URL`
+* **Nginx:** `SERVER_NAME`, `FRONTEND_HOST`, `FRONTEND_PORT`, `BACKEND_HOST`, `BACKEND_PORT`
 
-### React dev server vs built frontend behavior
+### Frontend Dev vs Production
 
-* Dev server (npm start) serves files live and supports hot reload. In this mode you typically use `REACT_APP_API_BASE_URL=http://localhost:5000` or proxy in `package.json`.
-* Production build (`npm run build`) creates static files that Nginx can serve directly; set `REACT_APP_API_BASE_URL=/api` so the built app expects the proxied API path.
-
----
-
-## Database initialization scripts explained
-
-* `database/init.sql.template` — SQL template that creates the database, tables, and user. Variables like `${MYSQL_DB}` are replaced by `envsubst`.
-* `database/seed.sql.template` — optional sample data to populate the DB.
-* `database/init-db.sh` — convenience script that runs `envsubst` on templates and writes `init.sql` and `seed.sql`.
-
-If you open `init.sql.template`, you should see `CREATE DATABASE IF NOT EXISTS ${MYSQL_DB};` and similar lines. Processing templates with `envsubst` ensures values from `.env` are used.
+* Dev: Hot reload, API base URL can be direct or proxied.
+* Production: Static build served by Nginx, API base URL should be `/api`.
 
 ---
 
-## Nginx configuration recommended snippet
+## Database Initialization Scripts
 
-Use a config that provides SPA fallback and sets common proxy headers.
+* `init.sql.template`: Creates DB, tables, user (variables replaced by `envsubst`)
+* `seed.sql.template`: Optional sample data
+* `init-db.sh`: Processes templates to final SQL
+
+---
+
+## Recommended Nginx Configuration
+
+SPA fallback and proxy headers:
 
 ```nginx
-
 server {
-    server_name _;
-    listen 80 default_server;
+   server_name _;
+   listen 80 default_server;
 
-#    root /var/www/html;   # uncomment if using static build files
-#    index index.html;     # uncomment if using static build files
+#    root /var/www/html;   # uncomment for static build
+#    index index.html;     # uncomment for static build
 
-    location / {                                              # comment if using static build files
-        proxy_pass http://localhost:3000;  # comment if using static build files
-    }                                                         # comment if using static build files
-    
-    location /api/ {
-        proxy_pass http://localhost:5000/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
+   location / {                                              # comment for static build
+      proxy_pass http://localhost:3000;  # comment for static build
+   }                                                         # comment for static build
+   
+   location /api/ {
+      proxy_pass http://localhost:5000/;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
 
-        # Handle preflight requests
-        if ($request_method = 'OPTIONS') {
-            add_header 'Access-Control-Allow-Origin' '*';
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
-            add_header 'Access-Control-Allow-Headers' 'Content-Type';
-            add_header 'Access-Control-Allow-Credentials' 'true';
-            add_header 'Content-Length' 0;
-            return 204;
-        }
-    }
+      # Preflight requests
+      if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type';
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Content-Length' 0;
+        return 204;
+      }
+   }
 }
-
 ```
 
-**Notes**
-
-* If you use the React dev server during development, set `proxy_pass` for `/` to `http://127.0.0.1:3000` or just use the dev server directly.
-* `try_files $uri /index.html` helps handle deep-linking in SPA builds.
+* For SPA builds, use `try_files $uri /index.html` for deep-linking.
 
 ---
 
-## CORS notes
+## CORS Guidance
 
-* If frontend dev server calls the backend directly (no Nginx), you must allow CORS on the Flask backend. Install and enable `flask-cors`:
+* Direct frontend-backend calls (no Nginx): enable CORS in Flask:
 
 ```python
-# in backend app initialization
 from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 ```
 
-* If you use Nginx proxying (`/api`), CORS is typically not necessary because browser requests originate from `localhost` (same origin) and are proxied by the server.
+* With Nginx proxying, CORS is usually not required.
 
 ---
 
-## Platform notes (Windows / macOS / Linux)
+## Platform Notes
 
-* **Windows venv activation (PowerShell):**
-
-  ```powershell
-  .\venv\Scripts\Activate.ps1
-  ```
-
-  or (cmd.exe)
-
-  ```
-  .\venv\Scripts\activate.bat
-  ```
-
-* **envsubst** is a POSIX tool. On Windows, use WSL, Git Bash, or manually replace variables in the templates. Alternatively, run `init-db.sh` inside WSL.
-
-* **MySQL on Windows**: Use MySQL Workbench or CLI to run the `init.sql` / `seed.sql`.
-
-* **Nginx on macOS**: Install via Homebrew: `brew install nginx`. Config location differs (usually `/usr/local/etc/nginx/nginx.conf`).
+* **Windows venv activation:**  
+  PowerShell: `.\venv\Scripts\Activate.ps1`  
+  CMD: `.\venv\Scripts\activate.bat`
+* **envsubst:** Use WSL/Git Bash or edit templates manually on Windows.
+* **MySQL:** Use Workbench or CLI for SQL imports.
+* **Nginx on macOS:** Install via Homebrew; config path may differ.
 
 ---
 
 ## Testing
 
-**Backend unit tests**
+**Backend:**
 
 ```bash
 cd backend
-source venv/bin/activate   # or Windows equivalent
+source venv/bin/activate
 python -m unittest discover tests
 ```
 
-**Frontend tests**
+**Frontend:**
 
 ```bash
 cd frontend
 npm test
 ```
 
-You can also run simple API checks with `curl`:
+**API check:**
 
 ```bash
 curl -X POST http://localhost/api/calculate \
@@ -416,56 +378,45 @@ curl -X POST http://localhost/api/calculate \
 
 ---
 
-## Troubleshooting & common issues
+## Troubleshooting
 
-**`init.sql` not found / templates not rendered**
+**Templates not rendered:**  
+Run `./database/init-db.sh`; install `gettext` if needed.
 
-* Run `./database/init-db.sh`. If `envsubst` is missing, install `gettext`.
+**MySQL connection issues:**  
+Check service status and credentials.
 
-**MySQL connection refused / access denied**
+**Frontend-backend connectivity:**  
+Set correct API base URL and enable CORS if needed.
 
-* Ensure MySQL service is running and credentials match `.env`.
-* If using a socket connection, ensure backend config uses host `localhost` or `127.0.0.1` appropriately.
+**Nginx config errors:**  
+Run `sudo nginx -t` and reload after fixing.
 
-**Frontend cannot reach backend (CORS / 404 / 500)**
+**Port conflicts:**  
+Default: frontend 3000, backend 5000, nginx 80. Adjust as needed.
 
-* If running without Nginx, set `REACT_APP_API_BASE_URL=http://localhost:5000` and enable CORS on backend.
-* If using Nginx, ensure `proxy_pass` settings are correct and the backend is running on the expected host/port.
-
-**Nginx config test failed**
-
-```bash
-sudo nginx -t
-# fix errors reported, then:
-sudo systemctl reload nginx
-```
-
-**Port conflicts**
-
-* Default ports: frontend 3000, backend 5000, nginx 80. Free them or change `.env` and relevant configs.
-
-**Permissions when importing SQL**
-
-* If you lack privileges, run SQL with an admin account or request DB admin help. The template includes CREATE USER / GRANT statements — these require privileges.
+**SQL import permissions:**  
+Use admin account or request DBA help.
 
 ---
 
-## Security & production notes
+## Security & Production
 
-* **Do not** use these defaults (weak passwords, `SECRET_KEY`) in production. Use strong secrets and a secrets manager.
-* For production, run the Flask app with a WSGI server (Gunicorn/uvicorn) behind Nginx, enable HTTPS (Let's Encrypt), and enable DB password policies.
-* Do not commit `.env` or any secrets to your repository.
+* Use strong secrets and passwords in production.
+* Run Flask with a WSGI server (Gunicorn/uvicorn) behind Nginx.
+* Enable HTTPS and DB password policies.
+* Never commit `.env` or secrets.
 
 ---
 
 ## Contributing
 
-Contributions welcome! Suggested workflow:
+Contributions welcome! Workflow:
 
 1. Fork the repo
 2. Create a feature branch
-3. Run tests and verify local setup
-4. Open a pull request with a clear summary of changes
+3. Run tests and verify setup
+4. Open a pull request with a clear summary
 
-If you change `init.sql.template` or `nginx.conf.template`, remember to update corresponding helper scripts.
+If you modify templates, update helper scripts accordingly.
 

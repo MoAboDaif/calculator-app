@@ -14,7 +14,7 @@ test('renders main parts (calculator + history)', () => {
   expect(historySection || historyLoading).toBeTruthy();
 
   // Footer and links
-  expect(screen.getByText(/© 2023 Enhanced Calculator/)).toBeInTheDocument();
+  expect(screen.getByText(/© 2023 Simple Calculator | Made by MoAboDaif/)).toBeInTheDocument();
   expect(screen.getByLabelText('Help')).toBeInTheDocument();
   expect(screen.getByLabelText('Settings')).toBeInTheDocument();
   expect(screen.getByLabelText('GitHub Repository')).toBeInTheDocument();
