@@ -13,8 +13,19 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Cypress
+# Cypress artifacts
+cypress/screenshots/
+cypress/videos/
 cypress/downloads/
+cypress/reports/
+
+# Cypress cache
+.cache/
+.cypress-cache/
+
+# If using mochawesome or junit reports
+mochawesome-report/
+junit-report.xml
 
 # Environment variables
 .env
