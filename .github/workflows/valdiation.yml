@@ -6,13 +6,14 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions: 
   id-token: write
   contents: read
 
 jobs:
-  npm-validations:
+  frontend-validations:
     runs-on: ubuntu-latest 
     steps:
       - name: code-checkout
@@ -21,11 +22,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-      - name: code-lint
+      - name: code-validations
         run: |
           cd frontend
           npm ci
           npx htmlhint "**/*.html"
           npm run lint 
           npm run test:ci
-      
+  backend_valdiations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: code-checkout
+        uses: actions/checkout@v4 
+      - name: pyhton-setup
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: code-validations
+        run: |
+          cd backend 
+          python -m venv venv
+          source venv/bin/activate
+          
