@@ -1,6 +1,6 @@
 // src/components/extra.branch.test.js
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import Calculator from './Calculator';
 import History from './History';
 import * as api from '../services/api';
@@ -20,13 +20,10 @@ describe('Branch coverage extras', () => {
     const subtractBtn = screen.getByTestId('subtract-button');
     const opSelect = screen.getByTestId('operation-select');
 
-    // ensure subtract not active initially
     expect(subtractBtn).not.toHaveClass('active');
 
-    // simulate keyboard Enter on the subtract button
     fireEvent.keyDown(subtractBtn, { key: 'Enter', code: 'Enter' });
 
-    // subtract should now be active and select updated
     expect(subtractBtn).toHaveClass('active');
     expect(opSelect.value).toBe('subtract');
   });
@@ -36,7 +33,6 @@ describe('Branch coverage extras', () => {
 
     render(<History />);
 
-    // wait for the error section to appear
     const errorSection = await screen.findByTestId('history-error');
 
     expect(errorSection).toBeInTheDocument();

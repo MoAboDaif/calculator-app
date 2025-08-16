@@ -1,4 +1,3 @@
-// src/components/History.symbols.test.js
 import { render, screen, waitFor, within } from '@testing-library/react';
 import History from './History';
 import * as api from '../services/api';
@@ -20,20 +19,17 @@ describe('History operation symbols (extra branch coverage)', () => {
 
     render(<History />);
 
-    // wait for items to render
     const section = await screen.findByTestId('history-section');
 
     await waitFor(() => {
-      const items = within(section).queryAllByTestId(/history-item-/);
+      const items = within(section).queryAllByTestId('history-item');
       expect(items.length).toBe(2);
     });
 
-    const items = within(section).queryAllByTestId(/history-item-/);
-    // multiply symbol × and divide symbol ÷ (use regex to tolerate spacing)
+    const items = within(section).queryAllByTestId('history-item');
     expect(within(items[0]).getByText(/2\s*×\s*4/)).toBeInTheDocument();
     expect(within(items[1]).getByText(/9\s*÷\s*3/)).toBeInTheDocument();
 
     expect(api.getHistory).toHaveBeenCalledTimes(1);
   });
 });
-

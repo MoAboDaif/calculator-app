@@ -1,0 +1,31 @@
+name: Calculator App Validiations and tests
+
+run-name: Calculator App Validiations and tests
+
+on:
+  push:
+    branches:
+      - main
+
+permissions: 
+  id-token: write
+  contents: read
+
+jobs:
+  npm-validations:
+    runs-on: ubuntu-latest 
+    steps:
+      - name: code-checkout
+        uses: actions/checkout@v4 
+      - name: node-setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: code-lint
+        run: |
+          cd frontend
+          npm ci
+          npx htmlhint "**/*.html"
+          npm run lint 
+          npm run test:ci
+      

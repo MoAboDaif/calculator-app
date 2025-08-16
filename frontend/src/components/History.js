@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getHistory } from '../services/api';
 
 const getOperationSymbol = (operation) => {
-  switch(operation) {
+  switch (operation) {
     case 'add': return '+';
     case 'subtract': return '−';
     case 'multiply': return '×';
@@ -12,9 +12,9 @@ const getOperationSymbol = (operation) => {
 };
 
 const formatDate = (dateString) => {
-  const options = { 
-    year: 'numeric', 
-    month: 'short', 
+  const options = {
+    year: 'numeric',
+    month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
@@ -38,7 +38,7 @@ const History = () => {
         setLoading(false);
       }
     };
-    
+
     fetchHistory();
   }, []);
 
@@ -67,12 +67,12 @@ const History = () => {
   return (
     <div className="history-section" data-testid="history-section">
       <h3><i className="fas fa-history"></i> Calculation History</h3>
-      <ul id="history-list">
+      <ul data-testid="history-list">
         {history.length === 0 ? (
           <li data-testid="no-history">No calculation history found</li>
         ) : (
           history.map((item, index) => (
-            <li key={index} data-testid={`history-item-${index}`}>
+            <li key={index} data-testid="history-item">
               <div className="history-calculation">
                 <span>{item.operand1} {getOperationSymbol(item.operation)} {item.operand2}</span>
                 <strong>= {item.result}</strong>
