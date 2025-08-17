@@ -51,6 +51,12 @@ jobs:
   e2e_testing:
     runs-on: ubuntu-latest
     environment: e2e_testing
+    env:
+      MYSQL_HOST: ${{vars.MYSQL_HOST}}
+      MYSQL_DB: ${{vars.MYSQL_DB}}
+      MYSQL_USER: ${{vars.MYSQL_USER}}
+      MYSQL_PASSWORD: ${{secrets.MYSQL_PASSWORD}}
+
     steps:
       - name: code-checkout
         uses: actions/checkout@v4 
@@ -64,10 +70,6 @@ jobs:
           node-version: "22.x"
       - name: init-mysql-db
         run: |
-          export MYSQL_HOST=${{env.MYSQL_HOST}}
-          export MYSQL_DB=${{env.MYSQL_DB}}
-          export MYSQL_USER=${{env.MYSQL_USER}}
-          export MYSQL_PASSWORD=${{secrets.MYSQL_PASSWORD}}
           sudo systemctl start mysql.service
           cd database
           envsubst < init.sql.template \
