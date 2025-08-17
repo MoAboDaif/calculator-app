@@ -1,6 +1,6 @@
 name: Calculator App Validiations and tests
 
-run-name: Calculator App Validiations and tests
+run-name: 'Calculator App Validiations and tests | Branch = ${{github.ref_name}}'
 
 on:
   push:
@@ -70,10 +70,10 @@ jobs:
 
           envsubst < seed.sql.template \
                           > seed.sql
-
-          sudo mysql -h localhost -u root < init.sql
-          sudo mysql -h localhost -u root < seed.sql
-
+          
           cat init.sql 
+
+          sudo mysql -h localhost -u root -proot < init.sql
+          sudo mysql -h localhost -u root -proot < seed.sql
 
           
