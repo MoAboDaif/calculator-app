@@ -157,8 +157,21 @@ jobs:
       - name: build-backend
         run: |
           cd backend
-          export DOCKER_IMAGE=${DOCKER_USER}/backend:${{github.ref_name}}-${{github.run_number}}
+          export DOCKER_IMAGE=${DOCKER_USER}/backend:${{github.ref_name}}-v${{github.run_number}}
           docker build -t ${DOCKER_IMAGE} .
           docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
           docker push ${DOCKER_IMAGE}
-          
+      - name: build-frontend
+        run: |
+          VARS='${SERVER_NAME} ${FRONTEND_HOST} ${FRONTEND_PORT} ${BACKEND_HOST} ${BACKEND_PORT}'
+          envsubst "$VARS" < nginx/nginx.conf.template \
+                                        > frontend/nginx.config
+      
+          cd frontend
+          cat nginx.config
+
+          export DOCKER_IMAGE=${DOCKER_USER}/frontend:${{github.ref_name}}-v${{github.run_number}}
+          docker build -t ${DOCKER_IMAGE} .
+          docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+          docker push ${DOCKER_IMAGE}
+
