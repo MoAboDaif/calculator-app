@@ -104,14 +104,16 @@ jobs:
             echo "Waiting for frontend..."
             sleep 2
           done
-      - name: start-frontend
+      - name: setup-proxy
         run: |
           sudo apt-get install -y nginx
           envsubst  < nginx.conf.template \
           > /etc/nginx/conf.d/nginx.conf
           echo '--------------------------------------------'
           /etc/nginx/conf.d/nginx.conf
-          
+
+          sudo systemctl start nginx
+
       - name: run e2e tests
         run: |
           curl http://localhost:8080/
