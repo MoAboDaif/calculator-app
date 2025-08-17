@@ -2,12 +2,14 @@ FROM python:3.13.7-slim
 
 WORKDIR /app
 
-RUN apk add --no-cache \
+RUN apk-get update && \
+    apk-get install -y --no-install-recommends \
     gcc \
     musl-dev \
     libffi-dev \
     mariadb-dev \
-    pkgconfig
+    pkgconfig && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
