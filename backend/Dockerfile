@@ -10,13 +10,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
+    build-essential \
     pkg-config \
-    libmysqlclient-dev \
+    libffi-dev \
     default-libmysqlclient-dev \
-    build-essential && \
-    rm -rf /var/lib/apt/lists/*
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
