@@ -2,8 +2,8 @@ FROM python:3.13.7-slim
 
 WORKDIR /app
 
-RUN apk-get update && \
-    apk-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     gcc \
     musl-dev \
     libffi-dev \
