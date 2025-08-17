@@ -107,7 +107,8 @@ jobs:
       - name: setup-proxy
         run: |
           sudo apt-get install -y nginx
-          envsubst  < nginx.conf.template \
+          
+          envsubst  < nginx/nginx.conf.template \
           > /etc/nginx/conf.d/nginx.conf
           echo '--------------------------------------------'
           cat /etc/nginx/conf.d/nginx.conf
