@@ -107,8 +107,9 @@ jobs:
       - name: setup-proxy
         run: |
           sudo apt-get install -y nginx
-
-          envsubst  < nginx/nginx.conf.template \
+          
+          VARS='${SERVER_NAME} ${FRONTEND_HOST} ${FRONTEND_PORT} ${BACKEND_HOST} ${BACKEND_PORT}'
+          envsubst "$VARS" < nginx/nginx.conf.template \
           | sudo tee /etc/nginx/conf.d/nginx.conf
           echo '--------------------------------------------'
           cat /etc/nginx/conf.d/nginx.conf
