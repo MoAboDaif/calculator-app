@@ -110,7 +110,7 @@ jobs:
           envsubst  < nginx.conf.template \
           > /etc/nginx/conf.d/nginx.conf
           echo '--------------------------------------------'
-          /etc/nginx/conf.d/nginx.conf
+          cat /etc/nginx/conf.d/nginx.conf
 
           sudo systemctl start nginx
 
