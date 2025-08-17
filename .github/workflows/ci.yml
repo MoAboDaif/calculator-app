@@ -140,7 +140,9 @@ jobs:
   build-images:
     runs-on: ubuntu-latest
     environment: e2e_testing
-    needs: e2e_testing
+    needs: 
+      - frontend-validations
+      - backend_validations
     env:
       SERVER_NAME: ${{vars.SERVER_NAME}}
       FRONTEND_HOST: ${{vars.FRONTEND_HOST}}
