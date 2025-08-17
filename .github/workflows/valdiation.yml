@@ -104,12 +104,18 @@ jobs:
             echo "Waiting for frontend..."
             sleep 2
           done
+      - name: start-frontend
+        run: |
+          sudo apt-get install -y nginx
+          envsubst  < nginx.conf.template \
+          > /etc/nginx/conf.d/nginx.conf
+          echo '--------------------------------------------'
+          /etc/nginx/conf.d/nginx.conf
+          
       - name: run e2e tests
         run: |
-          
+          curl http://localhost:8080/
+          echo '--------------------------------------------'
           curl http://localhost:5000/history
-          curl http://localhost:3000/api/history
-
-        
-
-          
+          echo '--------------------------------------------'
+          curl http://localhost:8080/api/history
