@@ -2,7 +2,7 @@ server {
     listen 80;
     server_name ${SERVER_NAME};
 
-    root /var/www/html;   # uncomment if using static build files
+    root /usr/share/nginx/html;   # uncomment if using static build files
     index index.html;     # uncomment if using static build files
 
 #    location / {                                              # comment if using static build files
