@@ -16,7 +16,6 @@ coverage/
 *.rendered
 .mypy_cache/
 .ruff_cache/
-.flake8
 
 # =====================
 # Node / Frontend
