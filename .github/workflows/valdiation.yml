@@ -4,8 +4,6 @@ run-name: Calculator App Validiations and tests
 
 on:
   push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions: 
@@ -31,6 +29,9 @@ jobs:
           npm run test:ci
   backend_valdiations:
     runs-on: ubuntu-latest
+    defaults:
+      run: 
+        working-directory: backend/
     steps:
       - name: code-checkout
         uses: actions/checkout@v4 
@@ -38,12 +39,41 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
-      - name: init-dependencies
+      - name: install-dependencies
         run: |
-          cd backend 
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements-dev.txt
+      - name: backend-validations
+        run: |
           make lint
           make test
+  e2e_testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: code-checkout
+        uses: actions/checkout@v4 
+      - name: pyhton-setup
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: node-setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: init-mysql-db
+        run: |
+          sudo systemctl start mysql.service
+          cd database
+          envsubst < init.sql.template \
+                > init.sql
+
+          envsubst < seed.sql.template \
+                          > seed.sql
+
+          sudo mysql -h localhost -u root < init.sql
+          sudo mysql -h localhost -u root < seed.sql
+
+          cat init.sql 
+
           
