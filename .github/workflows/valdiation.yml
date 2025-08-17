@@ -82,5 +82,23 @@ jobs:
 
           sudo mysql -h localhost -u root -proot < init.sql
           sudo mysql -h localhost -u root -proot < seed.sql
+      - name: start-backend
+        run: |
+          cd backend
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements-dev.txt
+          python app.py &
+      - name: start-frontend
+        run: |
+          cd frontend
+          npm install
+          npm run start &
+      - name: run e2e tests
+        run: |
+          cd frontend
+          npm run e2e:ci
+
+        
 
           
