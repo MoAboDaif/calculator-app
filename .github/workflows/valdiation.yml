@@ -1,6 +1,6 @@
-name: Calculator App Validiations and tests
+name: Calculator App Validations and Tests
+run-name: 'Calculator App Validations and Tests | Branch = ${{ github.ref_name }}'
 
-run-name: 'Calculator App Validiations and tests | Branch = ${{github.ref_name}}'
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
           npx htmlhint "**/*.html"
           npm run lint 
           npm run test:ci
-  backend_valdiations:
+  backend_validations:
     runs-on: ubuntu-latest
     defaults:
       run: 
@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: code-checkout
         uses: actions/checkout@v4 
-      - name: pyhton-setup
+      - name: python-setup
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - frontend-validations
-      - backend_valdiations
+      - backend_validations
     environment: e2e_testing
     env:
       MYSQL_HOST: ${{vars.MYSQL_HOST}}
@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: code-checkout
         uses: actions/checkout@v4 
-      - name: pyhton-setup
+      - name: python-setup
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
@@ -80,6 +80,12 @@ jobs:
       - name: init-mysql-db
         run: |
           sudo systemctl start mysql.service
+
+          until mysqladmin ping -h "localhost" --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 2
+          done
+        
           cd database
           envsubst < init.sql.template \
                 > init.sql
@@ -89,7 +95,10 @@ jobs:
           
           cat init.sql 
 
+          echo "Applying schema..."
           sudo mysql -h localhost -u root -proot < init.sql
+          
+          echo "Seeding data..."
           sudo mysql -h localhost -u root -proot < seed.sql
       - name: start-backend
         run: |
@@ -98,10 +107,14 @@ jobs:
           source venv/bin/activate
           pip install -r requirements-dev.txt
           python app.py &
+          until curl -s http://localhost:5000/; do
+            echo "Waiting for backend..."
+            sleep 2
+          done
       - name: start-frontend
         run: |
           cd frontend
-          npm install
+          npm ci
           npm run start &
           until curl -s http://localhost:3000; do
             echo "Waiting for frontend..."
@@ -115,9 +128,35 @@ jobs:
           envsubst "$VARS" < nginx/nginx.conf.template \
           | sudo tee /etc/nginx/conf.d/nginx.conf
 
-          sudo systemctl start nginx
-
+          sudo rm -f /etc/nginx/sites-enabled/default
+          sudo nginx -t
+          sudo systemctl restart nginx
       - name: run e2e tests
         run: |
           cd frontend
           npm run e2e:ci
+  build-images:
+    runs-on: ubuntu-latest
+    environment: e2e_testing
+    needs: e2e_testing
+    env:
+      SERVER_NAME: ${{vars.SERVER_NAME}}
+      FRONTEND_HOST: ${{vars.FRONTEND_HOST}}
+      FRONTEND_PORT: ${{vars.FRONTEND_PORT}}
+      BACKEND_HOST: ${{vars.BACKEND_HOST}}
+      BACKEND_PORT: ${{vars.BACKEND_PORT}}
+      MYSQL_ROOT_PASSWORD: ${{secrets.MYSQL_ROOT_PASSWORD}}
+      REACT_APP_API_BASE_URL: ${{vars.REACT_APP_API_BASE_URL}}
+      DOCKER_USER: ${{vars.DOCKER_USER}}
+      DOCKER_TOKEN: ${{secrets.DOCKER_TOKEN}}
+    steps:
+      - name: checkout-code
+        uses: actions/checkout@v4
+      - name: build-backend
+        run: |
+          cd backend
+          export DOCKER_IMAGE=${DOCKER_USER}/backend:${{github.ref_name}}-${{github.run_number}}
+          docker build -t ${DOCKER_IMAGE} .
+          docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+          docker push ${DOCKER_IMAGE}
+          
