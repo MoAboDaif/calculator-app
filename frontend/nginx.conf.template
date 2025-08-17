@@ -2,12 +2,12 @@ server {
     listen 80;
     server_name ${SERVER_NAME};
 
-#    root /var/www/html;   # uncomment if using static build files
-#    index index.html;     # uncomment if using static build files
+    root /var/www/html;   # uncomment if using static build files
+    index index.html;     # uncomment if using static build files
 
-    location / {                                              # comment if using static build files
-        proxy_pass http://${FRONTEND_HOST}:${FRONTEND_PORT};  # comment if using static build files
-    }                                                         # comment if using static build files
+#    location / {                                              # comment if using static build files
+#        proxy_pass http://${FRONTEND_HOST}:${FRONTEND_PORT};  # comment if using static build files
+#    }                                                         # comment if using static build files
     
     location /api/ {
         proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT}/;

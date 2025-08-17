@@ -164,11 +164,11 @@ jobs:
       - name: build-frontend
         run: |
           VARS='${SERVER_NAME} ${FRONTEND_HOST} ${FRONTEND_PORT} ${BACKEND_HOST} ${BACKEND_PORT}'
-          envsubst "$VARS" < nginx/nginx.conf.template \
-                                        > frontend/nginx.config
+          envsubst "$VARS" < frontend/nginx.conf.template \
+                                        > frontend/nginx.conf
       
           cd frontend
-          cat nginx.config
+          cat nginx.conf
 
           export DOCKER_IMAGE=${DOCKER_USER}/frontend:${{github.ref_name}}-v${{github.run_number}}
           docker build -t ${DOCKER_IMAGE} .
