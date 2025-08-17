@@ -5,7 +5,7 @@ run-name: 'Calculator App Validations and Tests | Branch = ${{ github.ref_name }
 on:
   push:
     branches:
-      - 'dev-*'
+      - 'dev*'
   workflow_dispatch:
 
 permissions: 
