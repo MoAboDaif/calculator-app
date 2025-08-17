@@ -43,4 +43,6 @@ jobs:
           cd backend 
           python -m venv venv
           source venv/bin/activate
+          make lint
+          make test
           
