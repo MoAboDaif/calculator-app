@@ -57,6 +57,11 @@ jobs:
       MYSQL_DB: ${{vars.MYSQL_DB}}
       MYSQL_USER: ${{vars.MYSQL_USER}}
       MYSQL_PASSWORD: ${{secrets.MYSQL_PASSWORD}}
+      SERVER_NAME: ${{vars.SERVER_NAME}}
+      FRONTEND_HOST: ${{vars.FRONTEND_HOST}}
+      FRONTEND_PORT: ${{vars.FRONTEND_PORT}}
+      BACKEND_HOST: ${{vars.BACKEND_HOST}}
+      BACKEND_PORT: ${{vars.BACKEND_PORT}}
 
     steps:
       - name: code-checkout
@@ -99,6 +104,15 @@ jobs:
             echo "Waiting for frontend..."
             sleep 2
           done
+      - name: setup-proxy-server
+        run: |
+          sudo apt install -y nginx
+          cd nginx
+          envsubst  < nginx.conf.template \
+          | sudo tee /etc/nginx/conf.d/default.conf
+          cat /etc/nginx/conf.d/default.conf
+          sudo systemctl start nginx
+
       - name: run e2e tests
         run: |
           cd frontend
