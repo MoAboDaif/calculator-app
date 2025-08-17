@@ -1,14 +1,21 @@
 FROM python:3.13.7-slim
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    MYSQL_HOST=localhost \
+    MYSQL_DB=calculator_db \
+    MYSQL_USER=calculator_user \
+    MYSQL_PASSWORD=
+
 WORKDIR /app
 
 RUN apt-get update && \
+    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    gcc \
-    musl-dev \
-    libffi-dev \
-    mariadb-dev \
-    pkgconfig && \
+    pkg-config \
+    libmysqlclient-dev \
+    default-libmysqlclient-dev \
+    build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
