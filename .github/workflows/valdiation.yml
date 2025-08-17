@@ -51,6 +51,9 @@ jobs:
           make test
   e2e_testing:
     runs-on: ubuntu-latest
+    needs:
+      - frontend-validations
+      - backend_valdiations
     environment: e2e_testing
     env:
       MYSQL_HOST: ${{vars.MYSQL_HOST}}
@@ -111,15 +114,10 @@ jobs:
           VARS='${SERVER_NAME} ${FRONTEND_HOST} ${FRONTEND_PORT} ${BACKEND_HOST} ${BACKEND_PORT}'
           envsubst "$VARS" < nginx/nginx.conf.template \
           | sudo tee /etc/nginx/conf.d/nginx.conf
-          echo '--------------------------------------------'
-          cat /etc/nginx/conf.d/nginx.conf
 
           sudo systemctl start nginx
 
       - name: run e2e tests
         run: |
-          curl http://localhost:8080/
-          echo '--------------------------------------------'
-          curl http://localhost:5000/history
-          echo '--------------------------------------------'
-          curl http://localhost:8080/api/history
+          cd frontend
+          npm run e2e:ci
