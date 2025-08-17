@@ -50,6 +50,7 @@ jobs:
           make test
   e2e_testing:
     runs-on: ubuntu-latest
+    environment: e2e_testing
     steps:
       - name: code-checkout
         uses: actions/checkout@v4 
