@@ -17,7 +17,7 @@ const ThemeToggle = () => {
 
   return (
     <div className="theme-toggle" data-testid="theme-toggle">
-      <i className="fas fa-moon"></i>
+      <i className="fas fa-sun"></i>
       <label className="switch">
         <input 
           type="checkbox" 
@@ -27,7 +27,7 @@ const ThemeToggle = () => {
         />
         <span className="slider round"></span>
       </label>
-      <i className="fas fa-sun"></i>
+      <i className="fas fa-moon"></i>
     </div>
   );
 };
