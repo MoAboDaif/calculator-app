@@ -17,7 +17,7 @@ services:
       - calcnet
 
   backend:
-    image: moabodaif/backend:main-v27
+    image: moabodaif/backend:main-v30
     container_name: backend
     restart: always
     depends_on:
@@ -34,7 +34,7 @@ services:
       - calcnet
 
   frontend:
-    image: moabodaif/frontend:main-v27
+    image: moabodaif/frontend:main-v30
     container_name: frontend
     restart: always
     depends_on:
