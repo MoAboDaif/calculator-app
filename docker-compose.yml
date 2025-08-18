@@ -1,0 +1,54 @@
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: calculator_db
+      MYSQL_USER: calculator_user
+      MYSQL_PASSWORD: securepassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - calcnet
+
+  backend:
+    image: moabodaif/backend:main-v27
+    container_name: backend
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_DB: calculator_db
+      MYSQL_USER: calculator_user
+      MYSQL_PASSWORD: securepassword
+      SECRET_KEY: secretkey
+#    ports:
+#      - "5000:5000"
+    networks:
+      - calcnet
+
+  frontend:
+    image: moabodaif/frontend:main-v27
+    container_name: frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      REACT_APP_API_BASE_URL: /api
+    ports:
+      - "8080:80"
+    networks:
+      - calcnet
+
+volumes:
+  mysql-data:
+
+networks:
+  calcnet:
+    driver: bridge
