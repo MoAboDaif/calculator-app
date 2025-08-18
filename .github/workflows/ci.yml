@@ -171,29 +171,42 @@ jobs:
     steps:
       - name: checkout-code
         uses: actions/checkout@v4
-      - name: build-backend
-        run: |
-          cd backend
-          export DOCKER_IMAGE=${DOCKER_USER}/backend:${{github.ref_name}}-v${{github.run_number}}
-          docker build \
-            --cache-from=type=registry,ref=${DOCKER_USER}/backend:cache \
-            --cache-to=type=registry,ref=${DOCKER_USER}/backend:cache,mode=max \
-            -t ${DOCKER_IMAGE} .
-          docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
-          docker push ${DOCKER_IMAGE}
-      - name: build-frontend
-        run: |
-          VARS='${SERVER_NAME} ${FRONTEND_HOST} ${FRONTEND_PORT} ${BACKEND_HOST} ${BACKEND_PORT}'
-          envsubst "$VARS" < frontend/nginx.conf.template \
-                                        > frontend/nginx.conf
-      
-          cd frontend
-          cat nginx.conf
+      - name: Build & Push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.DOCKER_USER }}/backend:${{ github.ref_name }}-v${{ github.run_number }}
+          cache-from: type=registry,ref=${{ env.DOCKER_USER }}/backend:cache
+          cache-to: type=registry,ref=${{ env.DOCKER_USER }}/backend:cache,mode=max
+      - name: Build & Push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.DOCKER_USER }}/frontend:${{ github.ref_name }}-v${{ github.run_number }}
+          cache-from: type=registry,ref=${{ env.DOCKER_USER }}/frontend:cache
+          cache-to: type=registry,ref=${{ env.DOCKER_USER }}/frontend:cache,mode=max
 
-          export DOCKER_IMAGE=${DOCKER_USER}/frontend:${{github.ref_name}}-v${{github.run_number}}
-          docker build \
-            --cache-from=type=registry,ref=${DOCKER_USER}/frontend:cache \
-            --cache-to=type=registry,ref=${DOCKER_USER}/frontend:cache,mode=max \
-            -t ${DOCKER_IMAGE} .
-          docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
-          docker push ${DOCKER_IMAGE}
+      # - name: build-backend
+      #   run: |
+      #     cd backend
+      #     export DOCKER_IMAGE=${DOCKER_USER}/backend:${{github.ref_name}}-v${{github.run_number}}
+      #     docker build -t ${DOCKER_IMAGE} .
+      #     docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+      #     docker push ${DOCKER_IMAGE}
+      # - name: build-frontend
+      #   run: |
+      #     VARS='${SERVER_NAME} ${FRONTEND_HOST} ${FRONTEND_PORT} ${BACKEND_HOST} ${BACKEND_PORT}'
+      #     envsubst "$VARS" < frontend/nginx.conf.template \
+      #                                   > frontend/nginx.conf
+      
+      #     cd frontend
+      #     cat nginx.conf
+
+      #     export DOCKER_IMAGE=${DOCKER_USER}/frontend:${{github.ref_name}}-v${{github.run_number}}
+      #     docker build -t ${DOCKER_IMAGE} .
+      #     docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+      #     docker push ${DOCKER_IMAGE}
